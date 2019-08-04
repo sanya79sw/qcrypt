@@ -1,0 +1,24 @@
+{
+  "name": "qcrypt",
+  "version": "0.8.1",
+  "description": "Encrypt your file",
+  "main": "index.js",
+  "preferGlobal": true,
+  "bin": {
+    "qcrypt": "src/index.js"
+  },
+  "dependencies": {
+    "yargs": "^13.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ale_xxx_",
+  "license": "MIT",
+  "keywords": [
+    "crypt",
+    "encryp",
+    "decrypt"
+  ]
+}
