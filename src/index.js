@@ -1,41 +1,26 @@
-#!/usr/bin/env node
-
 const fs = require("fs"),
     argv = require("yargs").argv;
-const crypto = require("crypto"),
-    resizedIV = Buffer.allocUnsafe(16),
-    iv = crypto
-    .createHash("sha256")
-    .update("myHashedIV")
-    .digest();
+const crypto = require("crypto");
 
-iv.copy(resizedIV);
+const iv = Buffer.alloc(16, 0);
+const algorithm = 'aes-192-cbc';
+const password = argv.key;
+const key = crypto.scryptSync(password, 'salt', 24);
 
 if (argv.e && argv.key && argv.file) {
-    const key = crypto.createHash("sha256").update(argv.key).digest(),
-        cipher = crypto.createCipheriv("aes256", key, resizedIV);
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
 
-    let input = fs.createReadStream(argv.file, "utf-8");
-    let output = fs.createWriteStream(`${argv.file}.enc`, "utf-8");
-    input.on("data", chunk => {
-        let str = ''
-        str += chunk;
-        let encrypt = cipher.update(str, "binary", "hex");
-        output.write(encrypt);
-    });
+    const input = fs.createReadStream(argv.file);
+    const output = fs.createWriteStream(`${argv.file}.enc`);
+
+    input.pipe(cipher).pipe(output);
 }
 
 if (argv.d && argv.key && argv.file) {
-    const key = crypto
-        .createHash("sha256")
-        .update(argv.key)
-        .digest(),
-        decipher = crypto.createDecipheriv("aes256", key, resizedIV);
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
 
-    let input = fs.createReadStream(argv.file, "utf-8");
-    let output = fs.createWriteStream(`${argv.file}.dec`, "utf-8");
+    const input = fs.createReadStream(argv.file);
+    const output = fs.createWriteStream(`${argv.file}.dec`);
 
-    input.on("data", chunk => {
-        output.write(decipher.update(chunk, "hex", "binary"));
-    });
+    input.pipe(decipher).pipe(output);
 }
